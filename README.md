@@ -121,7 +121,7 @@ preek-mp3-converter/
 ├── src/
 │   ├── video_processor/        # Video processing Lambda
 │   │   ├── app.py
-│   │   └── requirements.txt
+│   │   └── requirements.txtaw
 │   ├── frontend_logic/         # API Gateway handler Lambda
 │   │   ├── app.py
 │   │   └── requirements.txt
