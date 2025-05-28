@@ -9,8 +9,8 @@ echo "🚀 AWS Setup voor YouTube naar MP3 Project"
 echo "=========================================="
 
 # Variabelen
-AWS_REGION=${AWS_REGION:-"eu-west-1"}  # Amsterdam region
-PROJECT_NAME="preek-mp3"
+AWS_REGION=${AWS_REGION:-"eu-west-1"}  # Ireland region
+PROJECT_NAME="mp3maker"
 BUCKET_NAME="${PROJECT_NAME}-storage-$(date +%s)"  # Unique bucket name
 IAM_USER_NAME="${PROJECT_NAME}-developer"
 LAMBDA_ROLE_NAME="${PROJECT_NAME}-lambda-role"
