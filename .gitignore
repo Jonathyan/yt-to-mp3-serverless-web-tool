@@ -173,4 +173,10 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-aws-setup-log.txt
+#   Logs of running bash scripts
+bash-script-logs.txt
+
+
+#   Lambda Layer files
+layer-build/
+ffmpeg-ytdlp-layer.zip
