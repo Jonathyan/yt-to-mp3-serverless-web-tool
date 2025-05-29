@@ -15,6 +15,8 @@ Deze applicatie maakt het mogelijk om moeiteloos preek-audio uit zondagsdienst Y
 - 🧹 **Auto Cleanup**: MP3-bestanden worden automatisch na 24 uur verwijderd
 - 🛠️ **Minimaal Onderhoud**: Volledig beheerd via Infrastructure as Code (AWS SAM)
 
+![Diagram](images/mock.png)
+
 ## 🏗️ Architectuur
 
 ### AWS Services
