@@ -24,7 +24,7 @@ Deze applicatie maakt het mogelijk om moeiteloos preek-audio uit zondagsdienst Y
 - **CloudWatch**: Logging en monitoring
 - **IAM**: Security en toegangsbeheer
 
-![Diagram](architecture.png)
+![Diagram](images/architecture.png)
 
 ### Tech Stack
 - **Backend**: Python 3.9+

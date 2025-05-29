@@ -184,3 +184,6 @@ ffmpeg-ytdlp-layer.zip
 
 #   Media files
 *.mp3
+
+#   Mac files
+.DS_Store

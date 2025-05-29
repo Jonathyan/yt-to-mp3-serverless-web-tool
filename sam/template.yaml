@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  VideoProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: -video-processor
+      CodeUri: ./lambda-package/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Timeout: 300
+      MemorySize: 1024
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref S3Bucket
+      Layers:
+        - !Ref YtDlpLayer
+
+  YtDlpLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ffmpeg-ytdlp-layer
+      ContentUri: ./layer-build/
+      CompatibleRuntimes:
+        - python3.12
+      CompatibleArchitectures:
+        - arm64
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${PROJECT_NAME}-bucket"
