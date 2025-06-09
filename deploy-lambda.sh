@@ -21,7 +21,7 @@ MEMORY_SIZE=1024  # 1GB RAM
 echo "📦 Lambda functie packagen..."
 rm -rf lambda-package
 mkdir lambda-package
-cp lambda_function.py lambda-package/
+cp ./lambda/lambda_function.py lambda-package/
 cd lambda-package
 zip -r ../lambda-deployment.zip .
 cd ..
