@@ -126,66 +126,110 @@ def parse_time(time_str):
 
 
 def download_video(url, output_path):
-    """Download YouTube video using yt-dlp."""
-    ydl_opts = {
-        'format': 'best[ext=mp4]/best',
-        'outtmpl': output_path,
-        'quiet': True,
-        'no_warnings': True,
-        'nocheckcertificate': True,  # Sometimes needed in Lambda
-    }
+    """Download YouTube video using yt-dlp with anti-bot measures."""
     
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            logger.info(f"Downloading video from: {url}")
-            ydl.download([url])
+    # Meerdere configuraties proberen
+    configs = [
+        # Config 1: Basis anti-bot
+        {
+            'format': 'best[height<=720]/best',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+            },
+            'sleep_interval': 2,
+            'retries': 3,
+        },
+        # Config 2: Audio-only fallback
+        {
+            'format': 'bestaudio[ext=m4a]/bestaudio',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) rv:109.0'
+            },
+            'sleep_interval': 3,
+            'retries': 5,
+        },
+        # Config 3: Minimale configuratie
+        {
+            'format': 'worst',
+            'ignoreerrors': True,
+            'no_check_certificate': True,
+        }
+    ]
+    
+    for i, config in enumerate(configs):
+        logger.info(f"Trying download config {i+1}/3")
+        
+        # Basis configuratie
+        ydl_opts = {
+            'outtmpl': output_path,
+            'quiet': True,
+            'no_warnings': True,
+            'nocheckcertificate': True,
+            **config  # Merge specifieke config
+        }
+        
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+                
+                # Check resultaat
+                if os.path.exists(output_path):
+                    file_size = os.path.getsize(output_path) / (1024 * 1024)
+                    logger.info(f"Video downloaded successfully with config {i+1}: {file_size:.2f} MB")
+                    return True
+                    
+        except yt_dlp.DownloadError as e:
+            error_msg = str(e)
+            logger.warning(f"Config {i+1} failed: {error_msg}")
             
-            # Check if file exists
-            if os.path.exists(output_path):
-                file_size = os.path.getsize(output_path) / (1024 * 1024)
-                logger.info(f"Video downloaded successfully: {file_size:.2f} MB")
-                return True
-            else:
-                logger.error("Video file not found after download")
+            # Stop als het duidelijk een permanente error is
+            if any(phrase in error_msg.lower() for phrase in ['private video', 'video unavailable', 'copyright']):
+                logger.error(f"Permanent error detected: {error_msg}")
                 return False
                 
-    except Exception as e:
-        logger.error(f"Error downloading video: {str(e)}")
-        return False
+        except Exception as e:
+            logger.warning(f"Config {i+1} exception: {str(e)}")
+    
+    logger.error("All download configurations failed")
+    return False
 
 
-def extract_audio(video_path, output_path, start_time, end_time, bitrate):
-    """Extract audio segment using FFmpeg."""
+def extract_audio(input_path, output_path, start_time, end_time, bitrate):
+    """Extract audio segment, handle both video and audio-only inputs."""
     duration = end_time - start_time
+    
+    # Check input type
+    probe_cmd = [FFMPEG_PATH, '-i', input_path, '-f', 'null', '-']
+    try:
+        probe_result = subprocess.run(probe_cmd, capture_output=True, text=True)
+        has_video = 'Video:' in probe_result.stderr
+        logger.info(f"Input has video stream: {has_video}")
+    except:
+        has_video = True  # Assume video if probe fails
     
     # Build FFmpeg command
     cmd = [
         FFMPEG_PATH,
-        '-ss', str(start_time),      # Seek to start time
-        '-i', video_path,            # Input file
-        '-t', str(duration),         # Duration
-        '-vn',                       # No video
-        '-acodec', 'libmp3lame',     # MP3 codec
-        '-ab', bitrate,              # Bitrate
-        '-ac', '1',                  # Mono
-        '-ar', '44100',              # Sample rate
-        '-y',                        # Overwrite output
+        '-ss', str(start_time),
+        '-i', input_path,
+        '-t', str(duration),
+        '-acodec', 'libmp3lame',
+        '-ab', bitrate,
+        '-ac', '1',  # Mono
+        '-ar', '44100',
+        '-y',
         output_path
     ]
     
+    # Add -vn only if input has video
+    if has_video:
+        cmd.insert(-2, '-vn')  # Insert before output path
+    
     try:
         logger.info(f"Extracting audio: {start_time}s to {end_time}s ({duration}s)")
-        logger.info(f"FFmpeg command: {' '.join(cmd)}")
         
-        # Run FFmpeg
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         
-        # Check if file was created
         if os.path.exists(output_path):
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             logger.info(f"Audio extracted successfully: {file_size:.2f} MB")
