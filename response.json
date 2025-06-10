@@ -1,1 +1,1 @@
-{"statusCode": 500, "body": "{\"error\": \"Failed to download video\", \"message\": \"Processing failed\"}"}
+{"statusCode": 500, "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}, "body": "{\"success\": false, \"error\": \"Failed to download video from YouTube\", \"request_id\": \"a8df58a6-05db-4d76-b893-557227296330\", \"message\": \"Audio processing failed\"}"}
