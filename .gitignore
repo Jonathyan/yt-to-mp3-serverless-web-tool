@@ -189,3 +189,19 @@ ffmpeg-ytdlp-layer.zip
 .DS_Store
 
 cookies/
+
+# AWS specifiek
+.aws/
+aws-config.env
+access-keys.json
+
+# Build artifacts
+.sam/
+layer-build/
+lambda-package/
+*.zip
+
+# Temporary files
+/tmp/
+*.mp3
+*.mp4
