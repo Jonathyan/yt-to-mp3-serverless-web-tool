@@ -179,6 +179,7 @@ bash-script-logs.txt
 
 #   Lambda Layer files
 layer-build/
+layer-build*/
 ffmpeg-ytdlp-layer.zip
 
 
